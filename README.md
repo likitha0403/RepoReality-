@@ -1,47 +1,146 @@
-# t2c2-twin-titans
+RepoReality
 
-Private hackathon repository for Twin Titans.
+Evidence-Driven Documentation Verification for Open-Source Repositories
 
-## RepoReality
+RepoReality is a Python-based tool that helps maintainers identify potential inconsistencies between repository documentation and the files available in a project archive.
 
-RepoReality is a local Streamlit app that checks documentation claims against the contents of a repository ZIP. It detects explicitly documented file paths, common installation commands, runtime version requirements, dependency names, and configuration variables; technology mentions alone are not treated as file claims. Each detected claim is marked **Verified**, **Failed**, or **Unverified**, with evidence and a correction suggestion only when repository evidence supports one. Checks that cannot be concluded reliably (such as an absent configuration variable or a manifest in an unspecified subfolder) remain unverified. A single top-level project folder in a ZIP is normalized before checks. Verification reports can be downloaded as JSON.
+Documentation can become outdated as code changes. Installation commands may refer to missing files, documented paths may no longer exist, and runtime requirements may lack supporting evidence. RepoReality analyzes documentation claims against inspected repository contents and presents findings for human review.
 
-The analyzer reads supported text files in memory; it does not extract archives to disk, execute repository code, or run shell commands. It uses deterministic local checks and does not need an API key.
-When an evidence-backed correction is available, the Results tab can preview the README change side by side and download a draft; the uploaded archive is never modified.
+The Problem
 
-### Requirements
+Documentation drift makes open-source projects harder to install, understand, maintain, and contribute to. Manually checking every documented path and setup instruction can be time-consuming.
 
-- Python 3.11 or later
-- Windows PowerShell (instructions below), macOS, or Linux
+What RepoReality Does
 
-### Run on Windows
+- Documentation verification: Checks supported documentation claims against repository evidence.
+- Evidence-backed results: Classifies findings as "Verified", "Failed", or "Unverified".
+- Installation checks: Checks whether required files, such as "requirements.txt", exist for supported installation commands.
+- Repository analysis: Inspects archive contents and supported documentation references.
+- Correction guidance: Provides explanations and suggested corrections for findings that need attention.
+- Impact and recovery support: Provides repository analysis and recovery-oriented information through the available analysis modules.
+- Reviewable output: Presents findings in a Streamlit interface and supports report generation.
 
-From the repository folder, create and activate a virtual environment, install dependencies, and launch Streamlit:
+How It Works
 
-```powershell
-py -m venv .venv
+1. Upload a repository ZIP archive.
+2. RepoReality inspects the archive and its supported contents.
+3. It extracts supported documentation claims and checks them against available evidence.
+4. Findings are categorized by verification status, with explanations and suggested corrections where applicable.
+5. Review the results and decide which documentation or repository changes are appropriate.
+
+Understanding the Results
+
+Status| Meaning
+Verified| Supporting evidence was found for the check performed.
+Failed| The available evidence conflicts with the documented claim or does not satisfy the applicable check.
+Unverified| There is insufficient evidence to make a reliable determination.
+
+These results describe the checks performed; they do not guarantee that an entire repository or application is correct.
+
+Security Considerations
+
+RepoReality is designed to inspect uploaded archives without executing uploaded repository code by default.
+
+Archive handling includes safeguards intended to address unsafe paths, duplicate filenames, corrupted archive entries, and potentially dangerous archive contents. These safeguards reduce risk but should not be interpreted as a guarantee against every malicious upload.
+
+Only upload repositories you are authorized to inspect. Review generated recommendations before applying changes.
+
+Technology Stack
+
+- Python
+- Streamlit
+- Pandas
+- Plotly
+- Python standard library testing tools
+
+Getting Started
+
+Requirements
+
+- Python compatible with the dependencies in "requirements.txt"
+- pip
+- Git (optional, for cloning the repository)
+
+Installation
+
+Clone the repository:
+
+git clone https://github.com/mysorequeen64-ops/RepoReality.git
+cd RepoReality
+
+Create and activate a virtual environment.
+
+Windows PowerShell:
+
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+
+Install dependencies:
+
 python -m pip install -r requirements.txt
+
+Run the Application
+
 python -m streamlit run app.py
-```
 
-If PowerShell blocks virtual-environment activation, use the environment's Python executable directly:
+Open the local address displayed by Streamlit in your browser.
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m streamlit run app.py
-```
+Testing
 
-Open the local URL printed by Streamlit, then upload a repository `.zip` file in the sidebar.
+Run the test suite:
 
-### Run tests
+python -m unittest discover -v
 
-```powershell
-py -m unittest discover -v
-```
+Check Python syntax and compilation:
 
-The core analyzer tests use Python's standard library and do not need Streamlit to run.
+python -m compileall -q app.py reporeality tests
 
-### Inspection limits
+Check Git whitespace errors:
 
-For safe, predictable local inspection, archives are limited to 5,000 entries, 50 MB total uncompressed content, and 5 MB per file. Supported text formats are decoded as UTF-8; binary and unrecognized files are skipped. The current deterministic checks support common Python, Node.js, Go, Rust, and Composer manifests; unsupported claim formats remain unverified or are not reported.
+git diff --check
+
+Tests help verify implemented behavior, but passing tests do not establish that every possible input or security scenario is covered.
+
+Project Structure
+
+RepoReality/
+├── app.py
+├── reporeality/
+│   ├── analyzer.py
+│   ├── impact.py
+│   ├── preview.py
+│   ├── repomap.py
+│   └── report.py
+├── tests/
+├── requirements.txt
+├── .gitignore
+├── LICENSE
+└── README.md
+
+GitHub Copilot and Development
+
+GitHub Copilot was used as a development assistant during project planning, implementation, debugging, and test development.
+
+Examples of relevant development work include refining documentation-checking rules, investigating incorrect findings, improving archive-handling behavior, and adding regression tests.
+
+Copilot-assisted changes should still be reviewed and tested. AI-generated suggestions are not treated as proof that a finding is correct; RepoReality presents evidence and explanations to support human review.
+
+Current Limitations
+
+- Verification depends on the documentation patterns and evidence the current implementation supports.
+- A missing file does not always mean the documentation is wrong; local virtual environments and generated files may not belong in a repository.
+- Some claims may remain unverified when the required evidence is unavailable.
+- Suggested corrections require human review.
+- The tool does not guarantee complete documentation correctness, application correctness, or comprehensive security.
+
+Future Improvements
+
+Potential improvements include broader manifest support, more robust command validation, additional regression tests, and integration with pull-request review workflows.
+
+License
+
+This project is licensed under the MIT License. See "LICENSE" (LICENSE) for details.
+
+Repository
+
+Source code and tests: https://github.com/mysorequeen64-ops/RepoReality
